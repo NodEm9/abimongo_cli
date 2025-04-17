@@ -17,7 +17,7 @@ export async function handleGraphQLAPI(projectName: string) {
   const configDir = path.join(entryDir, 'config');
   await fs.ensureDir(configDir);
   const dbFile = path.join(configDir, 'db.ts');
-  const indexFile = path.join(entryDir, 'index.ts');
+
 
   //Publish the extras folder
   const graphqlDir = path.join(extrasDir, 'graphql');
@@ -26,7 +26,7 @@ export async function handleGraphQLAPI(projectName: string) {
   const typeDefsFile = path.join(graphqlDir, 'typeDefs.ts');
   const resolversFile = path.join(graphqlDir, 'resolvers.ts');
 
-
+  const indexFile = path.join(rootDir, 'index.ts');
   const packageJsonPath = path.join(rootDir, 'package.json');
   const tsconfigPath = path.join(rootDir, 'tsconfig.json');
   const envPath = path.join(rootDir, '.env.local');
@@ -42,11 +42,11 @@ export async function handleGraphQLAPI(projectName: string) {
   "name": "abimongo-graphql-api",
   "version": "1.0.0",
   "description": "Abimongo GraphQL API",
-  "main": "src/index.js",
+  "main": "./index.ts",
   "type": "module",
   "license": "ISC",
   "scripts": {
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node index.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
@@ -67,21 +67,30 @@ export async function handleGraphQLAPI(projectName: string) {
     tsconfigPath,
     `{
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleDetection": "auto",
+    "lib": ["ES2022", "DOM"],
     "jsx": "preserve",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
-    "outDir": "./dist",
-    "rootDir": "./"
-  }
+    "outDir": "./",
+    "rootDir": "./",
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }`
   );
 
-fs.writeFileSync(
-  envPath,
+  fs.writeFileSync(
+    envPath,
     `
 # Environment variables for the GraphQL API
 MONGO_URI=mongodb://localhost:27017/mydatabase
@@ -89,9 +98,9 @@ DB_NAME=mydatabase
 `
   );
 
-fs.writeFileSync(
-  dbFile,
-  `
+  fs.writeFileSync(
+    dbFile,
+    `
 import { AbimongoClient } from 'abimongo_core';
 
 export async function connectToDb() {
@@ -105,13 +114,13 @@ export async function connectToDb() {
 `
   )
 
-fs.writeFileSync(
-  indexFile,
-  `
+  fs.writeFileSync(
+    indexFile,
+    `
   import { ApolloServer } from '@apollo/server';
-  import typeDefs from '../extras/graphql/typeDefs';
-  import resolvers from '../extras/graphql/resolvers';
-  import { connectToDb } from './config/db';
+  import typeDefs from './extras/graphql/typeDefs';
+  import resolvers from './extras/graphql/resolvers';
+  import { connectToDb } from './src/config/db';
   import { expressMiddleware, ExpressContextFunctionArgument } from '@apollo/server/express4';
   import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
   import express from 'express';
@@ -151,9 +160,9 @@ fs.writeFileSync(
 `
   );
 
-fs.writeFileSync(
-  indexGraphqlFile,
-  `
+  fs.writeFileSync(
+    indexGraphqlFile,
+    `
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import typeDefs from './typeDefs';
 import resolvers from './resolvers';
@@ -166,8 +175,8 @@ export const schema = makeExecutableSchema({
   )
 
   fs.writeFileSync(
-typeDefsFile,
-`
+    typeDefsFile,
+    `
 import { gql } from 'graphql-tag';
 
 // Define your GraphQL schema using the gql template literal
@@ -192,9 +201,9 @@ const typeDefs = gql\`
 export default typeDefs; 
 `)
 
-fs.writeFileSync(
-  resolversFile,
-  `
+  fs.writeFileSync(
+    resolversFile,
+    `
 export default {
 Query: {
   hello: () => 'Hello from AbimongoGraphQL CLI template!'
@@ -205,12 +214,14 @@ Query: {
   fs.writeFileSync(
     readMePath,
     `# Abimongo GraphQL API
+    
 This is a GraphQL API project scaffolded with Abimongo CLI.
 
 It is a simple GraphQL API that connects to a MongoDB database using Abimongo.
 It includes a basic query to demonstrate the setup. Use this as a starting point for your own GraphQL API.
 
 ## Getting Started
+
 1. Install dependencies: \`npm install\`
 2. Start the server: \`npm run dev\`
 3. Access the GraphQL playground at \`http://localhost:4000/graphql\`
@@ -220,9 +231,9 @@ It includes a basic query to demonstrate the setup. Use this as a starting point
 7. Enjoy building your GraphQL API!
 `)
 
-fs.writeFileSync(
-gitIgnorePath,
-`
+  fs.writeFileSync(
+    gitIgnorePath,
+    `
 node_modules
 dist
 .env.local

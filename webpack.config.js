@@ -10,7 +10,7 @@ module.exports = {
   target: 'node',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'abimongo-scaffold.js'
+    filename: 'abimongo-scaffolder.js'
   },
   resolve: {
     extensions: ['.ts', '.js']

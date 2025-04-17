@@ -1,16 +1,35 @@
 {
   "name": "abimongo_cli",
-  "version": "1.0.0",
-  "main": "dist/cli/abimongo-scaffold.js",
-  "bin": {
-    "abimongo-cli": "./dist/bin/abimongo-scaffold.js"
+  "version": "0.0.0",
+  "main": "dist/abimongo-scaffolder.js",
+  "module": "dist/init.d.ts",
+  "types": "dist/bin/abimongo-scaffolder.d.ts",
+  "files": [
+    "dist",
+    "bin",
+    "cli"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/abimongo-scaffolder.js",
+      "require": "./dist/abimongo-scaffolder.js"
+    },
+    "./package.json": "./package.json"
   },
-  "types": "dist/index.d.ts",
+  "bin": {
+    "abimongo-cli": "./dist/bin/abimongo-scaffolder.js"
+  },
   "scripts": {
-    "build:cli": "webpack --config webpack.config.ts"
+    "build": "webpack --config webpack.config.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Emmanuel Nodolomwanyi",
+  "maintainers": [
+    {
+      "name": "Emmanuel Nodolomwanyi",
+      "email": "padave805@gmail.com"
+    }
+  ],
   "license": "ISC",
   "type": "commonjs",
   "description": "",
