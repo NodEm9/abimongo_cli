@@ -63,7 +63,7 @@ jobs:
           git commit -m "chore: Commit untracked Version bump [skip ci]" || echo "No changes to commit"
           git push origin main 
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
         env:
