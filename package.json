@@ -1,6 +1,6 @@
 {
   "name": "abimongo_cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "dist/abimongo-scaffolder.js",
   "module": "dist/init.d.ts",
   "types": "dist/bin/abimongo-scaffolder.d.ts",
