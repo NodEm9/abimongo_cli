@@ -1,6 +1,6 @@
 {
   "name": "abimongo_cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "dist/bin/abimongo_cli.js",
   "module": "dist/bin/cli/init.d.ts",
   "types": "dist/bin/abimongo_cli.d.ts",
