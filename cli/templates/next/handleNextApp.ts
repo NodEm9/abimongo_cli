@@ -113,13 +113,13 @@ module.exports = nextConfig`
     "start": "next start"
   },
   "dependencies": {
-    "abimongo_core": "^1.0.0",
+    "abimongo_core": "latest",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "latest"
   }
 }`
   );
@@ -144,6 +144,8 @@ This project uses **multi-tenant** support via Abimongo_Core.
 
   // 3. Install dependencies
   console.log(chalk.yellow('\nInstalling dependencies...'));
+  execSync('npm install abimongo_core', { cwd: projectPath, stdio: 'inherit' });
+  execSync('npm install typescript ts-node --save-dev ', { cwd: projectPath, stdio: 'inherit' });
   execSync('npm install', { cwd: projectPath, stdio: 'inherit' });
 
   console.log(chalk.green(`\nNext.js project '${projectName}' created successfully using Abimongo_Core!`));
