@@ -19,7 +19,21 @@ module.exports = {
   },
   externals: {
     'fsevents': 'commonjs fsevents'
-  }
+  },
+  plugins: [
+    {
+      apply: (compiler) => {
+        compiler.hooks.emit.tapAsync('AddShebangPlugin', (compilation, callback) => {
+          const content = compilation.assets['abimongo_cli.js'].source();
+          compilation.assets['abimongo_cli.js'] = {
+            source: () => `#!/usr/bin/env node\n${content}`,
+            size: () => content.length + '#!/usr/bin/env node\n'.length,
+          };
+          callback();
+        });
+      },
+    },
+  ],
 };
 
 
