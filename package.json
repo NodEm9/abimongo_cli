@@ -1,23 +1,11 @@
 {
   "name": "abimongo_cli",
   "version": "0.0.2",
-  "main": "dist/abimongo-scaffolder.js",
-  "module": "dist/init.d.ts",
-  "types": "dist/bin/abimongo-scaffolder.d.ts",
-  "files": [
-    "dist",
-    "bin",
-    "cli"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/abimongo-scaffolder.js",
-      "require": "./dist/abimongo-scaffolder.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "main": "dist/bin/abimongo_cli.js",
+  "module": "dist/bin/cli/init.d.ts",
+  "types": "dist/bin/abimongo_cli.d.ts",
   "bin": {
-    "abimongo-cli": "./dist/bin/abimongo-scaffolder.js"
+    "abimongo-cli": "./dist/bin/abimongo_cli.js"
   },
   "scripts": {
     "build": "webpack --config webpack.config.ts"

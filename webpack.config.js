@@ -2,15 +2,14 @@
 // webpack.cli.js
 
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
-  entry: './bin/abimongo-scaffold.ts',
+  entry: './bin/abimongo_cli.ts',
   target: 'node',
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'abimongo-scaffolder.js'
+    path: path.resolve(__dirname, 'dist/bin'),
+    filename: 'abimongo_cli.js'
   },
   resolve: {
     extensions: ['.ts', '.js']
