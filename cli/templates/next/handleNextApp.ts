@@ -93,7 +93,7 @@ module.exports = nextConfig`
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
     "noEmit": true,
     "jsx": "preserve"
   },
