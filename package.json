@@ -7,8 +7,17 @@
   "bin": {
     "abimongo-cli": "./dist/bin/abimongo_cli.js"
   },
+  "files": ["dist", "bin"],
+  "exports": {
+    ".": {
+      "require": "./dist/bin/abimongo_cli.js",
+      "import": "./dist/bin/cli/init.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "webpack --config webpack.config.ts"
+    "build": "webpack --config webpack.config.js",
+    "publish": "npm run build && npm version patch && npm publish"
   },
   "keywords": [],
   "author": "Emmanuel Nodolomwanyi",
