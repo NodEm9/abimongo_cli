@@ -19,7 +19,9 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "publish": "npm run build && npm version patch && npm publish"
+    "v:patch": "npm version patch",
+    "v:minor": "npm version minor",
+    "publish": "npm publish"
   },
   "keywords": [],
   "author": "Emmanuel Nodolomwanyi",
