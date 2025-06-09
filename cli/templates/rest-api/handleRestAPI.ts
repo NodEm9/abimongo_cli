@@ -23,7 +23,7 @@ export async function handleRestAPI(
 ) {
   const ext = options.useTypeScript ? 'ts' : 'js';
   const rootDir = path.resolve(process.cwd(), projectName);
-  const srcDir = path.join(rootDir, 'server');
+  const srcDir = path.join(rootDir, 'src');
   const README_FILE = path.join(rootDir, 'README.md');
 
   console.log(chalk.cyan(`\n🚀 Creating REST API project in ${rootDir}...\n`));
@@ -34,7 +34,7 @@ export async function handleRestAPI(
 import express from 'express';
 import cors from 'cors';
 ${options.useAbimongo ? `import { AbimongoClient } from 'abimongo_core';` : ''}
-${options.includeUtils ? `import { someHelper } from 'abimongo_utils'; // Example usage` : ''}
+${options.includeUtils ? `import { setupLogger, Logger } from 'abimongo_utils'; // Example usage` : ''}
 
 const app = express();
 app.use(cors());
@@ -56,15 +56,15 @@ app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));
   fs.writeFileSync(path.join(srcDir, `index.${ext}`), entryFileContent.trimStart());
 
   // Step 2: Write .env
-  fs.writeFileSync(path.join(srcDir, '.env'), `PORT=5000\nMONGO_URI=mongodb://localhost:27017/${projectName}`);
+  fs.writeFileSync(path.join(rootDir, '.env'), `PORT=5000\nMONGO_URI=mongodb://localhost:27017/${projectName}`);
 
   // Step 3: Init & install dependencies
-  execSync('npm init -y', { cwd: srcDir, stdio: 'inherit' });
+  execSync('npm init -y', { cwd: rootDir, stdio: 'inherit' });
 
   execSync(
     `npm install express cors dotenv${options.useAbimongo ?
-      ' abimongo_core' : ''}${options.includeUtils ? ' abimongo_utils' : ''}`,
-    { cwd: srcDir, stdio: 'inherit' }
+      'abimongo_core' : ''}${options.includeUtils ? ' abimongo_utils' : ''}`,
+    { cwd: rootDir, stdio: 'inherit' }
   );
 
   // Add README file

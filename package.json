@@ -8,7 +8,7 @@
     "abimongo-cli": "./dist/bin/abimongo_cli.js"
   },
   "files": [
-    "dist/**/*"
+    "dist"
   ],
   "exports": {
     ".": {
