@@ -2,151 +2,117 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import { execSync } from 'child_process';
+import { TemplateOptions } from '../../utils/types';
 
-export async function handleNextApp(projectName: string) {
-  const projectPath = path.join(process.cwd(), projectName);
+/**
+ * Handles the creation of a Next.js application with optional Abimongo integration.
+ *
+ * @param {string} projectName - The name of the project.
+ * @param {TemplateOptions} options - Options for the template.
+ */
+export async function handleNextApp(projectName: string, options: TemplateOptions) {
+  const { useTypeScript, useAbimongo, includeUtils } = options;
+  const ext = useTypeScript ? 'ts' : 'js';
+  const rootDir = path.resolve(process.cwd(), projectName);
 
-  // 1. Create basic structure
-  await fs.ensureDir(path.join(projectPath, 'pages/api'));
-  await fs.ensureDir(path.join(projectPath, 'models'));
-  await fs.ensureDir(path.join(projectPath, 'lib'));
+  console.log(chalk.cyan(`\n⚙️ Creating Next.js app in ${rootDir}...\n`));
 
-  // 2. Create core files
-  await fs.writeFile(
-    path.join(projectPath, 'pages', 'index.tsx'),
-    `export default function Home() {
-  return <div>Welcome to ${projectName} powered by Abimongo_Core!</div>
-}`
+  // 1. Create Next.js app
+  const createCommand = `npx create-next-app@latest ${projectName} ${useTypeScript ? '--typescript' : ''} --no-tailwind --eslint`;
+  execSync(createCommand, { stdio: 'inherit' });
+
+  const pagesDir = path.join(rootDir, 'pages');
+  const apiDir = path.join(pagesDir, 'api');
+  const configDir = path.join(rootDir, 'lib');
+
+  fs.ensureDirSync(apiDir);
+  fs.ensureDirSync(configDir);
+
+  // 2. API Route Example with Abimongo_Core if enabled
+  const apiHandler = useTypeScript
+    ? `import type { NextApiRequest, NextApiResponse } from 'next';
+${useAbimongo ? `import { initAbimongo } from '../../lib/abimongo.config';` : ''}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  ${useAbimongo ? 'await initAbimongo();' : ''}
+  res.status(200).json({ message: 'Hello from API route!' });
+}
+`
+    : `${useAbimongo ? `const { initAbimongo } = require('../../lib/abimongo.config');\n` : ''}
+export default async function handler(req, res) {
+  ${useAbimongo ? 'await initAbimongo();' : ''}
+  res.status(200).json({ message: 'Hello from API route!' });
+}
+`;
+
+  fs.writeFileSync(path.join(apiDir, `hello.${ext}`), apiHandler);
+
+  // 3. Create .env file
+  fs.writeFileSync(
+    path.join(rootDir, '.env.local'),
+    `MONGO_URI=mongodb://localhost:27017/${projectName}`
   );
 
-  await fs.writeFile(
-    path.join(projectPath, 'pages', 'api', 'hello.ts'),
-    `import type { NextApiRequest, NextApiResponse } from 'next'
+  // 4. Create Abimongo config
+  if (useAbimongo) {
+    const abimongoConfig = useTypeScript
+      ? `import { AbimongoClient } from 'abimongo_core';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.status(200).json({ message: 'Hello from Abimongo_Core-powered API!' })
-}`
-  );
-
-  await fs.writeFile(
-    path.join(projectPath, 'models', 'SampleModel.ts'),
-    `import { AbimongoSchema } from 'abimongo_core';
-
-export const SampleSchema = new AbimongoSchema({
-  name: { type: 'string', required: true },
-  description: { type: 'string' },
+const client = new AbimongoClient({
+  uri: process.env.MONGO_URI || 'mongodb://localhost:27017/${projectName}'
 });
 
-export default SampleSchema;
-`
-  );
-
-await fs.writeFile(
-path.join(projectPath, 'lib', 'abimongo.ts'),
-`
-import { AbimongoModel, abimongoClient, AbimongoCLient } from 'abimongo_core';
-import SampleSchema from '../models/SampleModel';
-
-export const getSampleModel = async (tenantId: string) => {
-  const db = await abimongoClient.connect(process.env.MONGODB_URI!);
-  let tenantDB = AbimongoClient.getTenantDB(tenantId);
-
-  return new AbimongoModel({
-    db: tenantDB, // Use the tenantDB for tenant-specific collections
-    collectionName: 'samples',
-    schema: SampleSchema,
-    tenantId,
-    client: db.client,
-  });
-};
-`
-  );
-
-await fs.writeFile(
-path.join(projectPath, '.env.local'),
-`
-MONGODB_URI=mongodb://localhost:27017/abimongo_core_test
-TENANT_ID=dev-tenant
-`
-);
-
-await fs.writeFile(
-path.join(projectPath, 'next.config.js'),
-`/** @type {import('next').NextConfig} */
-const nextConfig = {reactStrictMode: true, experimental: { appDir: true }};
-
-module.exports = nextConfig`
-);
-
-  await fs.writeFile(
-    path.join(projectPath, 'tsconfig.json'),
-    `{
-  "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "noEmit": true,
-    "jsx": "preserve"
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
-}`
-  );
-
-  await fs.writeFile(
-    path.join(projectPath, 'package.json'),
-    `{
-  "name": "${projectName}",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "abimongo_core": "latest",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {
-    "typescript": "latest"
+export async function initAbimongo() {
+  // You can use a try-catch block to handle connection errors
+  try {
+  await client.connect();
+  // Add model registration here
+  } catch (error) {
+    console.error('Error connecting to Abimongo:', error);
+    process.exit(1);
   }
-}`
-  );
-
-  await fs.writeFile(
-    path.join(projectPath, 'README.md'),
-    `# ${projectName}
-
-This is a starter Next.js project powered by **Abimongo_Core**.
-
-## Scripts
-
-- \`npm run dev\` — start development server
-- \`npm run build\` — build for production
-- \`npm run start\` — start production server
-
-## Multi-Tenancy
-
-This project uses **multi-tenant** support via Abimongo_Core.
+}
 `
-  );
+      : `const { AbimongoClient } = require('abimongo_core');
 
-  // 3. Install dependencies
-  console.log(chalk.yellow('\nInstalling dependencies...'));
-  execSync('npm install abimongo_core', { cwd: projectPath, stdio: 'inherit' });
-  execSync('npm install typescript ts-node --save-dev ', { cwd: projectPath, stdio: 'inherit' });
-  execSync('npm install', { cwd: projectPath, stdio: 'inherit' });
+const client = new AbimongoClient({
+  uri: process.env.MONGO_URI || 'mongodb://localhost:27017/${projectName}'
+});
 
-  console.log(chalk.green(`\nNext.js project '${projectName}' created successfully using Abimongo_Core!`));
+async function initAbimongo() {
+  // You can use a try-catch block to handle connection errors
+  await client.connect();
+  // Add model registration here
+}
+
+module.exports = { initAbimongo };
+`;
+
+    fs.writeFileSync(path.join(configDir, `abimongo.config.${ext}`), abimongoConfig);
+  }
+
+  // 5. Optional utils
+  if (includeUtils) {
+    const utilsDir = path.join(rootDir, 'lib', 'utils');
+    fs.ensureDirSync(utilsDir);
+
+    const utilCode = useTypeScript
+      ? `export function respondSuccess(data: any) {
+  return { success: true, data };
+}`
+      : `function respondSuccess(data) {
+  return { success: true, data };
+}
+module.exports = { respondSuccess };`;
+
+    fs.writeFileSync(path.join(utilsDir, `helper.${ext}`), utilCode);
+  }
+
+  // 6. Install Abimongo_Core
+  if (useAbimongo) {
+    console.log(chalk.yellow('📦 Installing abimongo_core...'));
+    execSync(`npm install abimongo_core`, { cwd: rootDir, stdio: 'inherit' });
+  }
+
+  console.log(chalk.green('\n✅ Next.js app setup complete!\n'));
 }
